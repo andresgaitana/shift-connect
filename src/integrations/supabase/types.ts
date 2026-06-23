@@ -264,6 +264,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      tienda_en_mi_zona: { Args: { _tienda_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "gt" | "agente" | "gz"

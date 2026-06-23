@@ -232,13 +232,17 @@ function ZonasTab() {
               </Select>
             </div>
           </div>
+          <div className="space-y-2"><Label>Encargado (GZ)</Label><Input value={encargado} onChange={(e) => setEncargado(e.target.value)} placeholder="Nombre del Gerente de Zona" /></div>
           <Button disabled={add.isPending} onClick={() => add.mutate()}>Agregar zona</Button>
         </CardContent>
       </Card>
       <div className="grid gap-2">
         {(zonas.data ?? []).map((z: any) => (
           <Card key={z.id}><CardContent className="p-3 flex items-center justify-between">
-            <div className="font-medium">{z.nombre}</div>
+            <div className="min-w-0">
+              <div className="font-medium truncate">{z.nombre}</div>
+              {z.encargado_nombre && <div className="text-xs text-muted-foreground truncate">GZ: {z.encargado_nombre}</div>}
+            </div>
             <Badge variant="outline">{z.grupo}</Badge>
           </CardContent></Card>
         ))}

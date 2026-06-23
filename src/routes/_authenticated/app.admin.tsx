@@ -165,7 +165,7 @@ function TiendaForm({ zonas, onDone }: { zonas: any[]; onDone: () => void }) {
     mutationFn: async () => {
       if (!nombre || !zonaId) throw new Error("Nombre y zona son requeridos");
       const { error } = await supabase.from("tiendas").insert({
-        codigo: codigo || null, nombre, zona_id: zonaId, direccion: direccion || null,
+        codigo: codigo || null, nombre, zona_id: zonaId, direccion: direccion || "",
         latitud: lat ? Number(lat) : null, longitud: lng ? Number(lng) : null, activa: true,
       });
       if (error) throw error;

@@ -255,3 +255,49 @@ function ZonasTab() {
     </div>
   );
 }
+
+function SeedGZCard() {
+  const qc = useQueryClient();
+  const seed = useServerFn(seedGerentesZona);
+  const [result, setResult] = useState<{ email: string; status: string; detail?: string }[] | null>(null);
+  const m = useMutation({
+    mutationFn: async () => await seed(),
+    onSuccess: (data) => {
+      setResult(data.results);
+      const created = data.results.filter((r) => r.status === "created").length;
+      const updated = data.results.filter((r) => r.status === "updated").length;
+      const errors = data.results.filter((r) => r.status === "error").length;
+      toast.success(`GZ: ${created} creados, ${updated} actualizados${errors ? `, ${errors} errores` : ""}`);
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2"><UserPlus className="h-4 w-4" /> Gerentes de Zona</CardTitle>
+        <CardDescription>
+          Crea las 10 cuentas de GZ con contraseña temporal <code className="text-xs">CoverTurnos2026!</code>.
+          Es idempotente: si la cuenta ya existe, solo actualiza perfil y rol.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Button size="sm" disabled={m.isPending} onClick={() => m.mutate()}>
+          {m.isPending ? "Procesando…" : "Crear / sincronizar cuentas GZ"}
+        </Button>
+        {result && (
+          <div className="space-y-1 text-xs">
+            {result.map((r) => (
+              <div key={r.email} className="flex items-center justify-between gap-2 border-b py-1">
+                <span className="truncate">{r.email}</span>
+                <Badge variant={r.status === "error" ? "destructive" : r.status === "created" ? "default" : "secondary"}>
+                  {r.status}{r.detail ? ` · ${r.detail}` : ""}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

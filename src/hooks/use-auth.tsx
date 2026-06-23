@@ -13,6 +13,7 @@ export interface ProfileRow {
   telefono: string | null;
   negocio: Business | null;
   zona_id: string | null;
+  tienda_id: string | null;
   activo: boolean;
 }
 

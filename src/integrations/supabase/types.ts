@@ -60,6 +60,7 @@ export type Database = {
           negocio: Database["public"]["Enums"]["business_type"] | null
           nombre_completo: string | null
           telefono: string | null
+          tienda_id: string | null
           updated_at: string
           zona_id: string | null
         }
@@ -70,6 +71,7 @@ export type Database = {
           negocio?: Database["public"]["Enums"]["business_type"] | null
           nombre_completo?: string | null
           telefono?: string | null
+          tienda_id?: string | null
           updated_at?: string
           zona_id?: string | null
         }
@@ -80,10 +82,18 @@ export type Database = {
           negocio?: Database["public"]["Enums"]["business_type"] | null
           nombre_completo?: string | null
           telefono?: string | null
+          tienda_id?: string | null
           updated_at?: string
           zona_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_tienda_id_fkey"
+            columns: ["tienda_id"]
+            isOneToOne: false
+            referencedRelation: "tiendas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_zona_id_fkey"
             columns: ["zona_id"]

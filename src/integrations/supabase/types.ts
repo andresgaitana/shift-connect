@@ -14,16 +14,250 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      postulaciones: {
+        Row: {
+          agente_id: string
+          created_at: string
+          estado: Database["public"]["Enums"]["application_status"]
+          id: string
+          mensaje: string | null
+          turno_id: string
+          updated_at: string
+        }
+        Insert: {
+          agente_id: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["application_status"]
+          id?: string
+          mensaje?: string | null
+          turno_id: string
+          updated_at?: string
+        }
+        Update: {
+          agente_id?: string
+          created_at?: string
+          estado?: Database["public"]["Enums"]["application_status"]
+          id?: string
+          mensaje?: string | null
+          turno_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "postulaciones_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turnos_vacantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          negocio: Database["public"]["Enums"]["business_type"] | null
+          nombre_completo: string | null
+          telefono: string | null
+          updated_at: string
+          zona_id: string | null
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id: string
+          negocio?: Database["public"]["Enums"]["business_type"] | null
+          nombre_completo?: string | null
+          telefono?: string | null
+          updated_at?: string
+          zona_id?: string | null
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          negocio?: Database["public"]["Enums"]["business_type"] | null
+          nombre_completo?: string | null
+          telefono?: string | null
+          updated_at?: string
+          zona_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_zona_id_fkey"
+            columns: ["zona_id"]
+            isOneToOne: false
+            referencedRelation: "zonas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiendas: {
+        Row: {
+          activa: boolean
+          codigo: string | null
+          created_at: string
+          direccion: string
+          id: string
+          latitud: number | null
+          longitud: number | null
+          nombre: string
+          updated_at: string
+          zona_id: string
+        }
+        Insert: {
+          activa?: boolean
+          codigo?: string | null
+          created_at?: string
+          direccion: string
+          id?: string
+          latitud?: number | null
+          longitud?: number | null
+          nombre: string
+          updated_at?: string
+          zona_id: string
+        }
+        Update: {
+          activa?: boolean
+          codigo?: string | null
+          created_at?: string
+          direccion?: string
+          id?: string
+          latitud?: number | null
+          longitud?: number | null
+          nombre?: string
+          updated_at?: string
+          zona_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiendas_zona_id_fkey"
+            columns: ["zona_id"]
+            isOneToOne: false
+            referencedRelation: "zonas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      turnos_vacantes: {
+        Row: {
+          agente_asignado: string | null
+          created_at: string
+          estado: Database["public"]["Enums"]["shift_status"]
+          fecha: string
+          gt_creador: string
+          hora_fin: string | null
+          hora_inicio: string | null
+          id: string
+          negocio: Database["public"]["Enums"]["business_type"]
+          notas: string | null
+          tienda_id: string
+          turno: Database["public"]["Enums"]["turno_slot"]
+          updated_at: string
+        }
+        Insert: {
+          agente_asignado?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["shift_status"]
+          fecha: string
+          gt_creador: string
+          hora_fin?: string | null
+          hora_inicio?: string | null
+          id?: string
+          negocio: Database["public"]["Enums"]["business_type"]
+          notas?: string | null
+          tienda_id: string
+          turno: Database["public"]["Enums"]["turno_slot"]
+          updated_at?: string
+        }
+        Update: {
+          agente_asignado?: string | null
+          created_at?: string
+          estado?: Database["public"]["Enums"]["shift_status"]
+          fecha?: string
+          gt_creador?: string
+          hora_fin?: string | null
+          hora_inicio?: string | null
+          id?: string
+          negocio?: Database["public"]["Enums"]["business_type"]
+          notas?: string | null
+          tienda_id?: string
+          turno?: Database["public"]["Enums"]["turno_slot"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turnos_vacantes_tienda_id_fkey"
+            columns: ["tienda_id"]
+            isOneToOne: false
+            referencedRelation: "tiendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      zonas: {
+        Row: {
+          created_at: string
+          grupo: Database["public"]["Enums"]["zone_group"]
+          id: string
+          nombre: string
+        }
+        Insert: {
+          created_at?: string
+          grupo: Database["public"]["Enums"]["zone_group"]
+          id?: string
+          nombre: string
+        }
+        Update: {
+          created_at?: string
+          grupo?: Database["public"]["Enums"]["zone_group"]
+          id?: string
+          nombre?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "gt" | "agente"
+      application_status: "pendiente" | "aprobada" | "rechazada"
+      business_type: "productos" | "mbk"
+      shift_status: "abierto" | "asignado" | "cancelado"
+      turno_slot: "AM" | "PM"
+      zone_group: "managua" | "foraneas"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +384,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "gt", "agente"],
+      application_status: ["pendiente", "aprobada", "rechazada"],
+      business_type: ["productos", "mbk"],
+      shift_status: ["abierto", "asignado", "cancelado"],
+      turno_slot: ["AM", "PM"],
+      zone_group: ["managua", "foraneas"],
+    },
   },
 } as const

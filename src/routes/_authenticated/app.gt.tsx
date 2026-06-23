@@ -21,14 +21,19 @@ export const Route = createFileRoute("/_authenticated/app/gt")({
 });
 
 function GTPage() {
-  const { user, roles } = useAuth();
+  const { user, roles, profile } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const isAdmin = roles.includes("admin");
 
   const tiendas = useQuery({
-    queryKey: ["tiendas-activas"],
-    queryFn: async () =>
-      (await supabase.from("tiendas").select("id, nombre, zona:zonas(nombre)").eq("activa", true).order("nombre")).data ?? [],
+    queryKey: ["tiendas-publicar", isAdmin ? "all" : profile?.tienda_id ?? null],
+    enabled: isAdmin || !!profile?.tienda_id,
+    queryFn: async () => {
+      let q = supabase.from("tiendas").select("id, codigo, nombre, zona:zonas(nombre)").eq("activa", true).order("nombre");
+      if (!isAdmin && profile?.tienda_id) q = q.eq("id", profile.tienda_id);
+      return (await q).data ?? [];
+    },
   });
 
   const turnos = useQuery({

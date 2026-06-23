@@ -264,9 +264,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      tienda_en_mi_zona: { Args: { _tienda_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "gt" | "agente"
+      app_role: "admin" | "gt" | "agente" | "gz"
       application_status: "pendiente" | "aprobada" | "rechazada"
       business_type: "productos" | "mbk"
       shift_status: "abierto" | "asignado" | "cancelado"
@@ -399,7 +400,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "gt", "agente"],
+      app_role: ["admin", "gt", "agente", "gz"],
       application_status: ["pendiente", "aprobada", "rechazada"],
       business_type: ["productos", "mbk"],
       shift_status: ["abierto", "asignado", "cancelado"],

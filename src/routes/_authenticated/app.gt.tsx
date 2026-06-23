@@ -25,33 +25,43 @@ function GTPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const isAdmin = roles.includes("admin");
+  const isGz = roles.includes("gz");
+  const isGt = roles.includes("gt");
 
   const tiendas = useQuery({
-    queryKey: ["tiendas-publicar", isAdmin ? "all" : profile?.tienda_id ?? null],
-    enabled: isAdmin || !!profile?.tienda_id,
+    queryKey: ["tiendas-publicar", isAdmin ? "all" : isGz ? `zona:${profile?.zona_id}` : profile?.tienda_id ?? null],
+    enabled: isAdmin || (isGz && !!profile?.zona_id) || (isGt && !!profile?.tienda_id),
     queryFn: async () => {
-      let q = supabase.from("tiendas").select("id, codigo, nombre, zona:zonas(nombre)").eq("activa", true).order("nombre");
-      if (!isAdmin && profile?.tienda_id) q = q.eq("id", profile.tienda_id);
+      let q = supabase.from("tiendas").select("id, codigo, nombre, zona:zonas(nombre)").eq("activa", true).order("codigo");
+      if (!isAdmin) {
+        if (isGz && profile?.zona_id) q = q.eq("zona_id", profile.zona_id);
+        else if (profile?.tienda_id) q = q.eq("id", profile.tienda_id);
+      }
       return (await q).data ?? [];
     },
   });
 
   const turnos = useQuery({
-    queryKey: ["mis-turnos-gt", user?.id],
+    queryKey: ["mis-turnos-gt", user?.id, isGz ? profile?.zona_id : null],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("turnos_vacantes")
-        .select("*, tienda:tiendas(nombre, zona:zonas(nombre)), postulaciones(id, estado, mensaje, agente_id, agente:profiles!postulaciones_agente_id_fkey(nombre_completo, telefono))")
-        .eq("gt_creador", user!.id)
+        .select("*, tienda:tiendas!inner(nombre, zona_id, zona:zonas(nombre)), postulaciones(id, estado, mensaje, agente_id, agente:profiles!postulaciones_agente_id_fkey(nombre_completo, telefono))")
         .order("fecha", { ascending: true });
+      if (isGz && profile?.zona_id && !isAdmin) {
+        q = q.eq("tienda.zona_id", profile.zona_id);
+      } else if (!isAdmin) {
+        q = q.eq("gt_creador", user!.id);
+      }
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
   });
 
-  if (!roles.includes("gt") && !roles.includes("admin")) {
-    return <p className="text-sm text-muted-foreground">Esta sección es solo para GT.</p>;
+  if (!isGt && !isAdmin && !isGz) {
+    return <p className="text-sm text-muted-foreground">Esta sección es solo para Gerentes de Tienda o de Zona.</p>;
   }
 
   return (

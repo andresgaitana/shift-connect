@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "gt" | "agente";
+export type AppRole = "admin" | "gt" | "gz" | "agente";
 export type Business = "productos" | "mbk";
 
 export interface ProfileRow {

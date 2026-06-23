@@ -142,7 +142,7 @@ function GTPage() {
 
 function PublicarForm({ tiendas, onDone }: { tiendas: any[]; onDone: () => void }) {
   const { user } = useAuth();
-  const [tiendaId, setTiendaId] = useState("");
+  const [tiendaId, setTiendaId] = useState(tiendas.length === 1 ? tiendas[0].id : "");
   const [fecha, setFecha] = useState("");
   const [turno, setTurno] = useState<"AM" | "PM">("AM");
   const [negocio, setNegocio] = useState<Business>("productos");

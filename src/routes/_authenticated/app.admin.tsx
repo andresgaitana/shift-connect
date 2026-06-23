@@ -38,7 +38,10 @@ function AdminPage() {
           <TabsTrigger value="tiendas">Tiendas</TabsTrigger>
           <TabsTrigger value="zonas">Zonas</TabsTrigger>
         </TabsList>
-        <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
+        <TabsContent value="users" className="mt-4 space-y-4">
+          <SeedGZCard />
+          <UsersTab />
+        </TabsContent>
         <TabsContent value="tiendas" className="mt-4"><TiendasTab /></TabsContent>
         <TabsContent value="zonas" className="mt-4"><ZonasTab /></TabsContent>
       </Tabs>

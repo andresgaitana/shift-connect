@@ -16,12 +16,13 @@ export const Route = createFileRoute("/_authenticated/app/turnos")({
 
 function TurnosListPage() {
   const { profile, roles } = useAuth();
+  const [regionFilter, setRegionFilter] = useState<string>("all");
   const [zonaFilter, setZonaFilter] = useState<string>("all");
   const [turnoFilter, setTurnoFilter] = useState<string>("all");
 
   const zonas = useQuery({
-    queryKey: ["zonas"],
-    queryFn: async () => (await supabase.from("zonas").select("id, nombre").order("nombre")).data ?? [],
+    queryKey: ["zonas-grupo"],
+    queryFn: async () => (await supabase.from("zonas").select("id, nombre, grupo").order("nombre")).data ?? [],
   });
 
   const turnos = useQuery({
@@ -29,7 +30,7 @@ function TurnosListPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("turnos_vacantes")
-        .select("id, fecha, turno, negocio, hora_inicio, hora_fin, notas, tienda:tiendas(id, nombre, direccion, zona_id, zona:zonas(nombre))")
+        .select("id, fecha, turno, negocio, hora_inicio, hora_fin, notas, tienda:tiendas(id, nombre, direccion, zona_id, zona:zonas(nombre, grupo))")
         .eq("estado", "abierto")
         .gte("fecha", new Date().toISOString().slice(0, 10))
         .order("fecha", { ascending: true });
@@ -51,25 +52,38 @@ function TurnosListPage() {
     );
   }
 
+  const zonasFiltradas = (zonas.data ?? []).filter((z) => regionFilter === "all" || z.grupo === regionFilter);
+
   const filtered = (turnos.data ?? []).filter((t) => {
+    if (regionFilter !== "all" && t.tienda?.zona?.grupo !== regionFilter) return false;
     if (zonaFilter !== "all" && t.tienda?.zona_id !== zonaFilter) return false;
     if (turnoFilter !== "all" && t.turno !== turnoFilter) return false;
     return true;
   });
 
+  const regionLabel = (g: string) => (g === "managua" ? "Managua (MGA)" : g === "foraneas" ? "Foráneas (FOR)" : g);
+
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">Turnos disponibles</h1>
-        <p className="text-sm text-muted-foreground">{negocioLabel(profile.negocio)}</p>
+        <p className="text-sm text-muted-foreground">{negocioLabel(profile.negocio)} · {filtered.length} disponibles</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
+        <Select value={regionFilter} onValueChange={(v) => { setRegionFilter(v); setZonaFilter("all"); }}>
+          <SelectTrigger><SelectValue placeholder="Región" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las regiones</SelectItem>
+            <SelectItem value="managua">Managua (MGA)</SelectItem>
+            <SelectItem value="foraneas">Foráneas (FOR)</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={zonaFilter} onValueChange={setZonaFilter}>
           <SelectTrigger><SelectValue placeholder="Zona" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las zonas</SelectItem>
-            {(zonas.data ?? []).map((z) => <SelectItem key={z.id} value={z.id}>{z.nombre}</SelectItem>)}
+            {zonasFiltradas.map((z) => <SelectItem key={z.id} value={z.id}>{z.nombre}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={turnoFilter} onValueChange={setTurnoFilter}>
@@ -81,6 +95,9 @@ function TurnosListPage() {
           </SelectContent>
         </Select>
       </div>
+      {regionFilter !== "all" && (
+        <p className="text-xs text-muted-foreground">Mostrando solo {regionLabel(regionFilter)}.</p>
+      )}
 
       {turnos.isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
       {!turnos.isLoading && filtered.length === 0 && (

@@ -168,10 +168,10 @@ function PublicarForm({ tiendas, onDone }: { tiendas: any[]; onDone: () => void 
     <div className="space-y-3">
       <div className="space-y-2">
         <Label>Tienda</Label>
-        <Select value={tiendaId} onValueChange={setTiendaId}>
+        <Select value={tiendaId} onValueChange={setTiendaId} disabled={tiendas.length === 1}>
           <SelectTrigger><SelectValue placeholder="Selecciona tienda" /></SelectTrigger>
           <SelectContent>
-            {tiendas.map((t) => <SelectItem key={t.id} value={t.id}>{t.nombre} — {t.zona?.nombre}</SelectItem>)}
+            {tiendas.map((t) => <SelectItem key={t.id} value={t.id}>{t.codigo} · {t.nombre} — {t.zona?.nombre}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>

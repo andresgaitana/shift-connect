@@ -94,7 +94,7 @@ function UsersTab() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(["admin", "gt", "agente"] as AppRole[]).map((r) => {
+              {(["admin", "gt", "gz", "agente"] as AppRole[]).map((r) => {
                 const has = u.roles.includes(r);
                 return (
                   <Button

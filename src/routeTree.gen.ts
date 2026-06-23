@@ -15,6 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppTurnosRouteImport } from './routes/_authenticated/app.turnos'
+import { Route as AuthenticatedAppMisPostulacionesRouteImport } from './routes/_authenticated/app.mis-postulaciones'
+import { Route as AuthenticatedAppGtRouteImport } from './routes/_authenticated/app.gt'
+import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
 import { Route as AuthenticatedAppTurnosIdRouteImport } from './routes/_authenticated/app.turnos.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -46,6 +49,22 @@ const AuthenticatedAppTurnosRoute = AuthenticatedAppTurnosRouteImport.update({
   path: '/turnos',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppMisPostulacionesRoute =
+  AuthenticatedAppMisPostulacionesRouteImport.update({
+    id: '/mis-postulaciones',
+    path: '/mis-postulaciones',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppGtRoute = AuthenticatedAppGtRouteImport.update({
+  id: '/gt',
+  path: '/gt',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppTurnosIdRoute =
   AuthenticatedAppTurnosIdRouteImport.update({
     id: '/$id',
@@ -57,6 +76,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/gt': typeof AuthenticatedAppGtRoute
+  '/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
   '/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
@@ -64,6 +86,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/app/admin': typeof AuthenticatedAppAdminRoute
+  '/app/gt': typeof AuthenticatedAppGtRoute
+  '/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
   '/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
@@ -74,6 +99,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
+  '/_authenticated/app/gt': typeof AuthenticatedAppGtRoute
+  '/_authenticated/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
   '/_authenticated/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
@@ -84,17 +112,31 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/app'
+    | '/app/admin'
+    | '/app/gt'
+    | '/app/mis-postulaciones'
     | '/app/turnos'
     | '/app/'
     | '/app/turnos/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/turnos' | '/app' | '/app/turnos/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/admin'
+    | '/app/gt'
+    | '/app/mis-postulaciones'
+    | '/app/turnos'
+    | '/app'
+    | '/app/turnos/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/app'
+    | '/_authenticated/app/admin'
+    | '/_authenticated/app/gt'
+    | '/_authenticated/app/mis-postulaciones'
     | '/_authenticated/app/turnos'
     | '/_authenticated/app/'
     | '/_authenticated/app/turnos/$id'
@@ -150,6 +192,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppTurnosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/mis-postulaciones': {
+      id: '/_authenticated/app/mis-postulaciones'
+      path: '/mis-postulaciones'
+      fullPath: '/app/mis-postulaciones'
+      preLoaderRoute: typeof AuthenticatedAppMisPostulacionesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/gt': {
+      id: '/_authenticated/app/gt'
+      path: '/gt'
+      fullPath: '/app/gt'
+      preLoaderRoute: typeof AuthenticatedAppGtRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/admin': {
+      id: '/_authenticated/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/turnos/$id': {
       id: '/_authenticated/app/turnos/$id'
       path: '/$id'
@@ -175,11 +238,17 @@ const AuthenticatedAppTurnosRouteWithChildren =
   )
 
 interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
+  AuthenticatedAppGtRoute: typeof AuthenticatedAppGtRoute
+  AuthenticatedAppMisPostulacionesRoute: typeof AuthenticatedAppMisPostulacionesRoute
   AuthenticatedAppTurnosRoute: typeof AuthenticatedAppTurnosRouteWithChildren
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
+  AuthenticatedAppGtRoute: AuthenticatedAppGtRoute,
+  AuthenticatedAppMisPostulacionesRoute: AuthenticatedAppMisPostulacionesRoute,
   AuthenticatedAppTurnosRoute: AuthenticatedAppTurnosRouteWithChildren,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
@@ -206,13 +275,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

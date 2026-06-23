@@ -220,18 +220,21 @@ export type Database = {
       zonas: {
         Row: {
           created_at: string
+          encargado_nombre: string | null
           grupo: Database["public"]["Enums"]["zone_group"]
           id: string
           nombre: string
         }
         Insert: {
           created_at?: string
+          encargado_nombre?: string | null
           grupo: Database["public"]["Enums"]["zone_group"]
           id?: string
           nombre: string
         }
         Update: {
           created_at?: string
+          encargado_nombre?: string | null
           grupo?: Database["public"]["Enums"]["zone_group"]
           id?: string
           nombre?: string

@@ -125,11 +125,14 @@ function GTPage() {
                           if (error) toast.error(error.message); else { toast.success("Aprobado"); qc.invalidateQueries({ queryKey: ["mis-turnos-gt"] }); }
                         }}><Check className="h-4 w-4 text-primary" /></Button>
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={async () => {
-                          const { error } = await supabase.from("postulaciones").update({ estado: "rechazada" }).eq("id", p.id);
-                          if (error) toast.error(error.message); else { qc.invalidateQueries({ queryKey: ["mis-turnos-gt"] }); }
+                          const motivo = window.prompt("Motivo de rechazo (obligatorio):", "");
+                          if (!motivo || !motivo.trim()) { toast.error("Debes indicar un motivo"); return; }
+                          const { error } = await supabase.from("postulaciones").update({ estado: "rechazada", motivo_rechazo: motivo.trim() }).eq("id", p.id);
+                          if (error) toast.error(error.message); else { toast.success("Rechazado"); qc.invalidateQueries({ queryKey: ["mis-turnos-gt"] }); }
                         }}><X className="h-4 w-4 text-destructive" /></Button>
                       </>
                     )}
+
                   </div>
                 </div>
               ))}

@@ -62,7 +62,7 @@ function HomePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const needsOnboarding = !profile?.negocio && !roles.includes("admin") && !roles.includes("gt");
+  const needsOnboarding = !profile?.negocio && !roles.includes("admin") && !roles.includes("gt") && !roles.includes("gz");
 
   return (
     <div className="space-y-6">
@@ -89,14 +89,14 @@ function HomePage() {
               </Card>
             </Link>
           )}
-          {roles.includes("gt") && (
+          {(roles.includes("gt") || roles.includes("gz")) && (
             <Link to="/app/gt">
               <Card className="transition hover:border-primary hover:shadow-sm">
                 <CardHeader className="flex-row items-center gap-3 space-y-0">
                   <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Briefcase className="h-5 w-5" /></div>
                   <div>
                     <CardTitle className="text-base">Mis turnos publicados</CardTitle>
-                    <CardDescription>Publica y aprueba postulantes</CardDescription>
+                    <CardDescription>{roles.includes("gz") ? "Publica y aprueba en tu zona" : "Publica y aprueba postulantes"}</CardDescription>
                   </div>
                 </CardHeader>
               </Card>

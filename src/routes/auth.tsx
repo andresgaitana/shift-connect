@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { lovable } from "@/integrations/lovable";
 import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
@@ -54,7 +53,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin + "/app" : undefined,
+        emailRedirectTo: typeof window !== "undefined" ? window.location.origin + import.meta.env.BASE_URL + "app" : undefined,
         data: { nombre_completo: nombre, telefono },
       },
     });
@@ -66,20 +65,25 @@ function AuthPage() {
 
   const signInGoogle = async () => {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: typeof window !== "undefined" ? window.location.origin : undefined,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo:
+          typeof window !== "undefined"
+            ? window.location.origin + import.meta.env.BASE_URL + "app"
+            : undefined,
+      },
     });
     setLoading(false);
-    if (result.error) return toast.error(String(result.error.message ?? result.error));
-    if (result.redirected) return;
-    navigate({ to: "/app", replace: true });
+    if (error) return toast.error(error.message);
+    // On success the browser is redirected to Google; the session is picked up on return.
   };
 
   const sendReset = async () => {
     if (!resetEmail) return toast.error("Ingresa tu correo");
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: window.location.origin + "/reset-password",
+      redirectTo: window.location.origin + import.meta.env.BASE_URL + "reset-password",
     });
     setLoading(false);
     if (error) return toast.error(error.message);

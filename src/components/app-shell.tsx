@@ -9,13 +9,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { location } = useRouterState();
   const isAgente = roles.includes("agente");
   const isGT = roles.includes("gt");
+  const isGz = roles.includes("gz");
   const isAdmin = roles.includes("admin");
 
   const nav: { to: string; label: string; icon: typeof Home; show: boolean }[] = [
     { to: "/app", label: "Inicio", icon: Home, show: true },
     { to: "/app/turnos", label: "Turnos", icon: Calendar, show: isAgente },
     { to: "/app/mis-postulaciones", label: "Mis postul.", icon: ClipboardList, show: isAgente },
-    { to: "/app/gt", label: "Mis turnos", icon: Briefcase, show: isGT },
+    { to: "/app/gt", label: "Mis turnos", icon: Briefcase, show: isGT || isGz },
     { to: "/app/admin", label: "Admin", icon: Shield, show: isAdmin },
   ].filter((n) => n.show);
 

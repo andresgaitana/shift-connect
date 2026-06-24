@@ -3,16 +3,14 @@ import {
   Outlet,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 
-import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+const HOME = import.meta.env.BASE_URL;
 
 function NotFoundComponent() {
   return (
@@ -24,7 +22,7 @@ function NotFoundComponent() {
           La página que buscas no existe o se movió.
         </p>
         <div className="mt-6">
-          <a href="/" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+          <a href={HOME} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
             Ir al inicio
           </a>
         </div>
@@ -36,7 +34,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -44,7 +41,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">Inténtalo de nuevo o vuelve al inicio.</p>
         <div className="mt-6 flex justify-center gap-2">
           <button onClick={() => { router.invalidate(); reset(); }} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Reintentar</button>
-          <a href="/" className="rounded-md border bg-background px-4 py-2 text-sm font-medium">Inicio</a>
+          <a href={HOME} className="rounded-md border bg-background px-4 py-2 text-sm font-medium">Inicio</a>
         </div>
       </div>
     </div>
@@ -52,36 +49,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "CoverTurnos — Cobertura de turnos para tiendas" },
-      { name: "description", content: "Plataforma interna para publicar y cubrir turnos vacantes en tiendas de conveniencia." },
-      { name: "theme-color", content: "#f1801f" },
-      { property: "og:title", content: "CoverTurnos — Cobertura de turnos para tiendas" },
-      { property: "og:description", content: "Plataforma interna para publicar y cubrir turnos vacantes en tiendas de conveniencia." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "CoverTurnos — Cobertura de turnos para tiendas" },
-      { name: "twitter:description", content: "Plataforma interna para publicar y cubrir turnos vacantes en tiendas de conveniencia." },
-      { name: "twitter:card", content: "summary" },
-    ],
-    links: [{ rel: "stylesheet", href: appCss }],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="es">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
-    </html>
-  );
-}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

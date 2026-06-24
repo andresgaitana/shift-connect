@@ -1,0 +1,1 @@
+ALTER TABLE public.postulaciones ADD COLUMN IF NOT EXISTS motivo_rechazo TEXT;

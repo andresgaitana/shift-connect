@@ -135,7 +135,17 @@ function TurnoDetail() {
             <Badge variant={myPost.data.estado === "aprobada" ? "default" : myPost.data.estado === "rechazada" ? "destructive" : "secondary"}>
               {estadoLabel(myPost.data.estado)}
             </Badge>
-            {myPost.data.mensaje && <p className="text-sm text-muted-foreground">"{myPost.data.mensaje}"</p>}
+            {myPost.data.estado === "aprobada" && (
+              <p className="text-sm text-primary">✅ Tu postulación fue recibida y aprobada por el Gerente.</p>
+            )}
+            {myPost.data.estado === "rechazada" && myPost.data.motivo_rechazo && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
+                <div className="font-medium text-destructive">Motivo del rechazo</div>
+                <p className="text-foreground/90 mt-1">{myPost.data.motivo_rechazo}</p>
+              </div>
+            )}
+            {myPost.data.mensaje && <p className="text-sm text-muted-foreground">Tu mensaje: "{myPost.data.mensaje}"</p>}
+
             {myPost.data.estado === "pendiente" && (
               <Button variant="outline" size="sm" onClick={() => cancelar.mutate()} disabled={cancelar.isPending}>
                 Cancelar postulación

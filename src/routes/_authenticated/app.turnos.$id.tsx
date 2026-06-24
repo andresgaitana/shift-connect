@@ -41,12 +41,13 @@ function TurnoDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("postulaciones")
-        .select("id, estado, mensaje")
+        .select("id, estado, mensaje, motivo_rechazo")
         .eq("turno_id", id).eq("agente_id", user!.id).maybeSingle();
       if (error) throw error;
       return data;
     },
   });
+
 
   const postular = useMutation({
     mutationFn: async () => {

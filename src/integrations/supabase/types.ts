@@ -21,6 +21,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["application_status"]
           id: string
           mensaje: string | null
+          motivo_rechazo: string | null
           turno_id: string
           updated_at: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["application_status"]
           id?: string
           mensaje?: string | null
+          motivo_rechazo?: string | null
           turno_id: string
           updated_at?: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["application_status"]
           id?: string
           mensaje?: string | null
+          motivo_rechazo?: string | null
           turno_id?: string
           updated_at?: string
         }

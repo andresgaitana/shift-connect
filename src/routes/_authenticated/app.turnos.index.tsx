@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { formatFecha, negocioLabel } from "@/lib/format";
 
-export const Route = createFileRoute("/_authenticated/app/turnos")({
+export const Route = createFileRoute("/_authenticated/app/turnos/")({
   head: () => ({ meta: [{ title: "Turnos disponibles — CoverTurnos" }] }),
   component: TurnosListPage,
 });

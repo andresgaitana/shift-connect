@@ -15,10 +15,10 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
-import { Route as AuthenticatedAppTurnosRouteImport } from './routes/_authenticated/app.turnos'
 import { Route as AuthenticatedAppMisPostulacionesRouteImport } from './routes/_authenticated/app.mis-postulaciones'
 import { Route as AuthenticatedAppGtRouteImport } from './routes/_authenticated/app.gt'
 import { Route as AuthenticatedAppAdminRouteImport } from './routes/_authenticated/app.admin'
+import { Route as AuthenticatedAppTurnosIndexRouteImport } from './routes/_authenticated/app.turnos.index'
 import { Route as AuthenticatedAppTurnosIdRouteImport } from './routes/_authenticated/app.turnos.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -50,11 +50,6 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppTurnosRoute = AuthenticatedAppTurnosRouteImport.update({
-  id: '/turnos',
-  path: '/turnos',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
 const AuthenticatedAppMisPostulacionesRoute =
   AuthenticatedAppMisPostulacionesRouteImport.update({
     id: '/mis-postulaciones',
@@ -71,11 +66,17 @@ const AuthenticatedAppAdminRoute = AuthenticatedAppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppTurnosIndexRoute =
+  AuthenticatedAppTurnosIndexRouteImport.update({
+    id: '/turnos/',
+    path: '/turnos/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppTurnosIdRoute =
   AuthenticatedAppTurnosIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAppTurnosRoute,
+    id: '/turnos/$id',
+    path: '/turnos/$id',
+    getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -86,9 +87,9 @@ export interface FileRoutesByFullPath {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/gt': typeof AuthenticatedAppGtRoute
   '/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
-  '/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
+  '/app/turnos/': typeof AuthenticatedAppTurnosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,9 +98,9 @@ export interface FileRoutesByTo {
   '/app/admin': typeof AuthenticatedAppAdminRoute
   '/app/gt': typeof AuthenticatedAppGtRoute
   '/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
-  '/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
+  '/app/turnos': typeof AuthenticatedAppTurnosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,9 +112,9 @@ export interface FileRoutesById {
   '/_authenticated/app/admin': typeof AuthenticatedAppAdminRoute
   '/_authenticated/app/gt': typeof AuthenticatedAppGtRoute
   '/_authenticated/app/mis-postulaciones': typeof AuthenticatedAppMisPostulacionesRoute
-  '/_authenticated/app/turnos': typeof AuthenticatedAppTurnosRouteWithChildren
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/turnos/$id': typeof AuthenticatedAppTurnosIdRoute
+  '/_authenticated/app/turnos/': typeof AuthenticatedAppTurnosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,9 +126,9 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/gt'
     | '/app/mis-postulaciones'
-    | '/app/turnos'
     | '/app/'
     | '/app/turnos/$id'
+    | '/app/turnos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -136,9 +137,9 @@ export interface FileRouteTypes {
     | '/app/admin'
     | '/app/gt'
     | '/app/mis-postulaciones'
-    | '/app/turnos'
     | '/app'
     | '/app/turnos/$id'
+    | '/app/turnos'
   id:
     | '__root__'
     | '/'
@@ -149,9 +150,9 @@ export interface FileRouteTypes {
     | '/_authenticated/app/admin'
     | '/_authenticated/app/gt'
     | '/_authenticated/app/mis-postulaciones'
-    | '/_authenticated/app/turnos'
     | '/_authenticated/app/'
     | '/_authenticated/app/turnos/$id'
+    | '/_authenticated/app/turnos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -205,13 +206,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/turnos': {
-      id: '/_authenticated/app/turnos'
-      path: '/turnos'
-      fullPath: '/app/turnos'
-      preLoaderRoute: typeof AuthenticatedAppTurnosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
     '/_authenticated/app/mis-postulaciones': {
       id: '/_authenticated/app/mis-postulaciones'
       path: '/mis-postulaciones'
@@ -233,44 +227,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAdminRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/turnos/': {
+      id: '/_authenticated/app/turnos/'
+      path: '/turnos'
+      fullPath: '/app/turnos/'
+      preLoaderRoute: typeof AuthenticatedAppTurnosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/turnos/$id': {
       id: '/_authenticated/app/turnos/$id'
-      path: '/$id'
+      path: '/turnos/$id'
       fullPath: '/app/turnos/$id'
       preLoaderRoute: typeof AuthenticatedAppTurnosIdRouteImport
-      parentRoute: typeof AuthenticatedAppTurnosRoute
+      parentRoute: typeof AuthenticatedAppRoute
     }
   }
 }
-
-interface AuthenticatedAppTurnosRouteChildren {
-  AuthenticatedAppTurnosIdRoute: typeof AuthenticatedAppTurnosIdRoute
-}
-
-const AuthenticatedAppTurnosRouteChildren: AuthenticatedAppTurnosRouteChildren =
-  {
-    AuthenticatedAppTurnosIdRoute: AuthenticatedAppTurnosIdRoute,
-  }
-
-const AuthenticatedAppTurnosRouteWithChildren =
-  AuthenticatedAppTurnosRoute._addFileChildren(
-    AuthenticatedAppTurnosRouteChildren,
-  )
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAdminRoute: typeof AuthenticatedAppAdminRoute
   AuthenticatedAppGtRoute: typeof AuthenticatedAppGtRoute
   AuthenticatedAppMisPostulacionesRoute: typeof AuthenticatedAppMisPostulacionesRoute
-  AuthenticatedAppTurnosRoute: typeof AuthenticatedAppTurnosRouteWithChildren
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppTurnosIdRoute: typeof AuthenticatedAppTurnosIdRoute
+  AuthenticatedAppTurnosIndexRoute: typeof AuthenticatedAppTurnosIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAdminRoute: AuthenticatedAppAdminRoute,
   AuthenticatedAppGtRoute: AuthenticatedAppGtRoute,
   AuthenticatedAppMisPostulacionesRoute: AuthenticatedAppMisPostulacionesRoute,
-  AuthenticatedAppTurnosRoute: AuthenticatedAppTurnosRouteWithChildren,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppTurnosIdRoute: AuthenticatedAppTurnosIdRoute,
+  AuthenticatedAppTurnosIndexRoute: AuthenticatedAppTurnosIndexRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

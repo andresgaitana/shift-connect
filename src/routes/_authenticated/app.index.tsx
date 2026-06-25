@@ -32,6 +32,7 @@ function HomePage() {
     },
   });
   const [zonaId, setZonaId] = useState<string>(profile?.zona_id ?? "");
+  const [editing, setEditing] = useState(false);
 
   const saveProfile = useMutation({
     mutationFn: async () => {
@@ -45,7 +46,7 @@ function HomePage() {
       });
       if (error) throw error;
     },
-    onSuccess: async () => { toast.success("Perfil actualizado"); await refresh(); },
+    onSuccess: async () => { toast.success("Perfil actualizado"); setEditing(false); await refresh(); },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -62,7 +63,10 @@ function HomePage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const needsOnboarding = !profile?.negocio && !roles.includes("admin") && !roles.includes("gt") && !roles.includes("gz");
+  const isAgente = roles.includes("agente");
+  const needsNegocio = isAgente && !profile?.negocio;
+  const showEditor = roles.length === 0 || needsNegocio || editing;
+  const showNegocioZona = isAgente || roles.length === 0;
 
   return (
     <div className="space-y-6">
@@ -118,61 +122,81 @@ function HomePage() {
         </div>
       )}
 
-      {/* Estado de la cuenta */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Mi cuenta</CardTitle>
-          <CardDescription className="flex gap-2 flex-wrap pt-1">
-            {roles.length === 0 ? (
-              <Badge variant="secondary">Sin rol asignado</Badge>
-            ) : roles.map((r) => <Badge key={r} variant="outline">{r}</Badge>)}
-            {profile?.negocio && <Badge>{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Nombre completo</Label>
-              <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+      {/* Mi cuenta */}
+      {showEditor ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{needsNegocio || roles.length === 0 ? "Completa tu cuenta" : "Editar mi cuenta"}</CardTitle>
+            <CardDescription className="flex gap-2 flex-wrap pt-1">
+              {roles.length === 0 ? (
+                <Badge variant="secondary">Sin rol asignado</Badge>
+              ) : roles.map((r) => <Badge key={r} variant="outline">{r}</Badge>)}
+              {profile?.negocio && <Badge>{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {needsNegocio && (
+              <p className="text-sm text-muted-foreground">Selecciona tu <strong>negocio</strong> para ver los turnos disponibles.</p>
+            )}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Nombre completo</Label>
+                <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Teléfono</Label>
+                <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+              </div>
+              {showNegocioZona && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Negocio</Label>
+                    <Select value={negocio} onValueChange={(v) => setNegocio(v as Business)}>
+                      <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="productos">Productos</SelectItem>
+                        <SelectItem value="mbk">MBK · Servicios Financieros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Zona</Label>
+                    <Select value={zonaId} onValueChange={setZonaId}>
+                      <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                      <SelectContent>
+                        {(zonas.data ?? []).map((z) => (
+                          <SelectItem key={z.id} value={z.id}>{z.nombre}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label>Teléfono</Label>
-              <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+            <div className="flex justify-end gap-2">
+              {editing && !needsNegocio && roles.length > 0 && (
+                <Button variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
+              )}
+              <Button disabled={saving || saveProfile.isPending} onClick={() => { setSaving(true); saveProfile.mutate(undefined, { onSettled: () => setSaving(false) }); }}>
+                Guardar
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label>Negocio</Label>
-              <Select value={negocio} onValueChange={(v) => setNegocio(v as Business)}>
-                <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="productos">Productos</SelectItem>
-                  <SelectItem value="mbk">MBK · Servicios Financieros</SelectItem>
-                </SelectContent>
-              </Select>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="flex items-center justify-between gap-3 py-4">
+            <div className="min-w-0">
+              <div className="font-medium truncate">{profile?.nombre_completo ?? "Mi cuenta"}</div>
+              <div className="flex gap-1.5 flex-wrap pt-1">
+                {roles.map((r) => <Badge key={r} variant="outline" className="text-[10px]">{r}</Badge>)}
+                {profile?.negocio && <Badge className="text-[10px]">{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Zona</Label>
-              <Select value={zonaId} onValueChange={setZonaId}>
-                <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
-                <SelectContent>
-                  {(zonas.data ?? []).map((z) => (
-                    <SelectItem key={z.id} value={z.id}>{z.nombre}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button disabled={saving || saveProfile.isPending} onClick={() => { setSaving(true); saveProfile.mutate(undefined, { onSettled: () => setSaving(false) }); }}>
-              Guardar
-            </Button>
-          </div>
-          {needsOnboarding && (
-            <p className="text-xs text-muted-foreground">
-              💡 Después de guardar, pide a un admin que te asigne el rol de Agente o GT.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Editar</Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Claim admin */}
       {roles.length === 0 && (

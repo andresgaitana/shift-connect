@@ -47,7 +47,7 @@ function GTPage() {
     queryFn: async () => {
       let q = supabase
         .from("turnos_vacantes")
-        .select("*, tienda:tiendas!inner(nombre, zona_id, zona:zonas(nombre)), postulaciones(id, estado, mensaje, agente_id, agente:profiles!postulaciones_agente_id_fkey(nombre_completo, telefono))")
+        .select("*, tienda:tiendas!inner(nombre, zona_id, zona:zonas(nombre)), postulaciones(id, estado, mensaje, agente_id)")
         .order("fecha", { ascending: true });
       if (isGz && profile?.zona_id && !isAdmin) {
         q = q.eq("tienda.zona_id", profile.zona_id);
@@ -56,7 +56,20 @@ function GTPage() {
       }
       const { data, error } = await q;
       if (error) throw error;
-      return data ?? [];
+      const rows = data ?? [];
+      // Traer los perfiles de los postulantes por separado (evita depender del FK
+      // postulaciones->profiles, que PostgREST no resuelve en este backend).
+      const agenteIds = [...new Set(rows.flatMap((t: any) => (t.postulaciones ?? []).map((p: any) => p.agente_id)))];
+      let perfiles = new Map<string, any>();
+      if (agenteIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles").select("id, nombre_completo, telefono").in("id", agenteIds);
+        perfiles = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      }
+      return rows.map((t: any) => ({
+        ...t,
+        postulaciones: (t.postulaciones ?? []).map((p: any) => ({ ...p, agente: perfiles.get(p.agente_id) ?? null })),
+      }));
     },
   });
 

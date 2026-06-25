@@ -75,18 +75,20 @@ function turnoHtml(t: any, tiendaNombre: string, direccion: string | null) {
 }
 
 async function handleTurnoInsert(t: any) {
-  // Datos de la tienda
+  // Datos de la tienda + región (grupo de su zona)
   const { data: tienda } = await admin
-    .from("tiendas").select("nombre, direccion").eq("id", t.tienda_id).maybeSingle();
+    .from("tiendas").select("nombre, direccion, zona:zonas(grupo)").eq("id", t.tienda_id).maybeSingle();
+  const region = (tienda as any)?.zona?.grupo;
+  if (!region) return { skipped: "tienda sin región" };
 
-  // Agentes del mismo negocio
+  // Agentes de la MISMA REGIÓN (sin importar negocio: Productos y MBK)
   const [{ data: profs }, { data: roles }] = await Promise.all([
-    admin.from("profiles").select("id").eq("negocio", t.negocio),
+    admin.from("profiles").select("id").eq("region", region),
     admin.from("user_roles").select("user_id").eq("role", "agente"),
   ]);
   const agentes = new Set((roles ?? []).map((r: any) => r.user_id));
   const ids = (profs ?? []).map((p: any) => p.id).filter((id: string) => agentes.has(id));
-  if (!ids.length) return { skipped: "sin agentes del negocio" };
+  if (!ids.length) return { skipped: "sin agentes en la región" };
 
   // Correos de esos agentes
   const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });

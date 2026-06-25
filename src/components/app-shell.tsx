@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/app", label: "Inicio", icon: Home, show: true },
     { to: "/app/turnos", label: "Turnos", icon: Calendar, show: isAgente },
     { to: "/app/mis-postulaciones", label: "Mis postul.", icon: ClipboardList, show: isAgente },
-    { to: "/app/gt", label: "Mis turnos", icon: Briefcase, show: isGT || isGz },
+    { to: "/app/gt", label: "Mis turnos", icon: Briefcase, show: isGT || isGz || isAdmin },
     { to: "/app/admin", label: "Admin", icon: Shield, show: isAdmin },
   ].filter((n) => n.show);
 

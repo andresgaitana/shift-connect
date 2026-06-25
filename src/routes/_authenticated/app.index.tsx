@@ -93,13 +93,13 @@ function HomePage() {
               </Card>
             </Link>
           )}
-          {(roles.includes("gt") || roles.includes("gz")) && (
+          {(roles.includes("gt") || roles.includes("gz") || roles.includes("admin")) && (
             <Link to="/app/gt">
               <Card className="transition hover:border-primary hover:shadow-sm">
                 <CardHeader className="flex-row items-center gap-3 space-y-0">
                   <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Briefcase className="h-5 w-5" /></div>
                   <div>
-                    <CardTitle className="text-base">Mis turnos publicados</CardTitle>
+                    <CardTitle className="text-base">{roles.includes("admin") && !roles.includes("gt") && !roles.includes("gz") ? "Publicar / gestionar turnos" : "Mis turnos publicados"}</CardTitle>
                     <CardDescription>{roles.includes("gz") ? "Publica y aprueba en tu zona" : "Publica y aprueba postulantes"}</CardDescription>
                   </div>
                 </CardHeader>

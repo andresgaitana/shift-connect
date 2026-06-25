@@ -30,18 +30,118 @@ function AdminPage() {
         <h1 className="text-2xl font-semibold">Administración</h1>
         <p className="text-sm text-muted-foreground">Gestiona usuarios, tiendas y zonas.</p>
       </div>
-      <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="dashboard">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="users">Usuarios</TabsTrigger>
           <TabsTrigger value="tiendas">Tiendas</TabsTrigger>
           <TabsTrigger value="zonas">Zonas</TabsTrigger>
         </TabsList>
+        <TabsContent value="dashboard" className="mt-4"><DashboardTab /></TabsContent>
         <TabsContent value="users" className="mt-4 space-y-4">
           <UsersTab />
         </TabsContent>
         <TabsContent value="tiendas" className="mt-4"><TiendasTab /></TabsContent>
         <TabsContent value="zonas" className="mt-4"><ZonasTab /></TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className={`text-2xl font-bold ${accent ?? ""}`}>{value}</div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RankBars({ title, rows }: { title: string; rows: { label: string; value: number }[] }) {
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  return (
+    <Card>
+      <CardHeader className="pb-2"><CardTitle className="text-base">{title}</CardTitle></CardHeader>
+      <CardContent className="space-y-2">
+        {rows.length === 0 && <p className="text-sm text-muted-foreground">Sin datos todavía.</p>}
+        {rows.map((r) => (
+          <div key={r.label} className="space-y-1">
+            <div className="flex justify-between text-sm gap-2">
+              <span className="truncate">{r.label}</span>
+              <span className="font-medium shrink-0">{r.value}</span>
+            </div>
+            <div className="h-2 rounded bg-muted overflow-hidden">
+              <div className="h-full bg-primary" style={{ width: `${(r.value / max) * 100}%` }} />
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function DashboardTab() {
+  const q = useQuery({
+    queryKey: ["admin-dashboard"],
+    queryFn: async () => {
+      const [{ data: turnos }, { data: posts }] = await Promise.all([
+        supabase.from("turnos_vacantes").select("id, estado, negocio, agente_asignado, tienda:tiendas(nombre, zona:zonas(nombre, grupo))"),
+        supabase.from("postulaciones").select("id, estado, agente_id"),
+      ]);
+      const t = turnos ?? [];
+      const agenteIds = [...new Set(t.map((x: any) => x.agente_asignado).filter(Boolean))];
+      let nombres: Record<string, string> = {};
+      if (agenteIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id, nombre_completo").in("id", agenteIds);
+        nombres = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p.nombre_completo ?? "Agente"]));
+      }
+      return { turnos: t, posts: posts ?? [], nombres };
+    },
+  });
+
+  if (q.isLoading) return <p className="text-sm text-muted-foreground">Cargando…</p>;
+  const turnos: any[] = q.data?.turnos ?? [];
+  const posts: any[] = q.data?.posts ?? [];
+  const nombres: Record<string, string> = q.data?.nombres ?? {};
+
+  const total = turnos.length;
+  const cubiertos = turnos.filter((t) => t.estado === "asignado").length;
+  const abiertos = turnos.filter((t) => t.estado === "abierto").length;
+  const cancelados = turnos.filter((t) => t.estado === "cancelado").length;
+  const cobertura = total ? Math.round((cubiertos / total) * 100) : 0;
+
+  const countBy = (arr: any[], key: (x: any) => string | null | undefined) => {
+    const m = new Map<string, number>();
+    arr.forEach((x) => { const k = key(x); if (k) m.set(k, (m.get(k) ?? 0) + 1); });
+    return [...m.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+  };
+
+  const porTienda = countBy(turnos, (t) => t.tienda?.nombre).slice(0, 8);
+  const porZona = countBy(turnos, (t) => t.tienda?.zona?.nombre);
+  const porAgente = countBy(turnos.filter((t) => t.agente_asignado), (t) => nombres[t.agente_asignado] ?? "Agente").slice(0, 8);
+  const mga = turnos.filter((t) => t.tienda?.zona?.grupo === "managua").length;
+  const foraneas = turnos.filter((t) => t.tienda?.zona?.grupo === "foraneas").length;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label="Turnos publicados" value={total} />
+        <StatCard label="Cubiertos" value={cubiertos} accent="text-green-600" />
+        <StatCard label="Sin cubrir (abiertos)" value={abiertos} accent="text-amber-600" />
+        <StatCard label="Cancelados" value={cancelados} accent="text-destructive" />
+        <StatCard label="% Cobertura" value={`${cobertura}%`} />
+        <StatCard label="Postulaciones" value={posts.length} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <RankBars title="🏪 Tiendas que más piden turnos" rows={porTienda} />
+        <RankBars title="🦸 Agentes que más apoyan" rows={porAgente} />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <RankBars title="🗺️ Turnos por zona" rows={porZona} />
+        <RankBars title="📍 Por región" rows={[{ label: "Managua", value: mga }, { label: "Foráneas", value: foraneas }]} />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth, type Business } from "@/hooks/use-auth";
+import { useAuth, type Business, type Region } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ function HomePage() {
   const [nombre, setNombre] = useState(profile?.nombre_completo ?? "");
   const [telefono, setTelefono] = useState(profile?.telefono ?? "");
   const [negocio, setNegocio] = useState<Business | "">(profile?.negocio ?? "");
+  const [region, setRegion] = useState<Region | "">(profile?.region ?? "");
 
   const zonas = useQuery({
     queryKey: ["zonas"],
@@ -42,6 +43,7 @@ function HomePage() {
         nombre_completo: nombre || null,
         telefono: telefono || null,
         negocio: negocio || null,
+        region: region || null,
         zona_id: zonaId || null,
       });
       if (error) throw error;
@@ -64,9 +66,10 @@ function HomePage() {
   });
 
   const isAgente = roles.includes("agente");
-  const needsNegocio = isAgente && !profile?.negocio;
-  const showEditor = roles.length === 0 || needsNegocio || editing;
+  const needsRegion = isAgente && !profile?.region;
+  const showEditor = roles.length === 0 || needsRegion || editing;
   const showNegocioZona = isAgente || roles.length === 0;
+  const regionLabel = (r: string) => (r === "managua" ? "Managua (MGA)" : r === "foraneas" ? "Foráneas (FOR)" : r);
 
   return (
     <div className="space-y-6">
@@ -126,17 +129,18 @@ function HomePage() {
       {showEditor ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{needsNegocio || roles.length === 0 ? "Completa tu cuenta" : "Editar mi cuenta"}</CardTitle>
+            <CardTitle className="text-base">{needsRegion || roles.length === 0 ? "Completa tu cuenta" : "Editar mi cuenta"}</CardTitle>
             <CardDescription className="flex gap-2 flex-wrap pt-1">
               {roles.length === 0 ? (
                 <Badge variant="secondary">Sin rol asignado</Badge>
               ) : roles.map((r) => <Badge key={r} variant="outline">{r}</Badge>)}
-              {profile?.negocio && <Badge>{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
+              {profile?.region && <Badge>{regionLabel(profile.region)}</Badge>}
+              {profile?.negocio && <Badge variant="secondary">{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {needsNegocio && (
-              <p className="text-sm text-muted-foreground">Selecciona tu <strong>negocio</strong> para ver los turnos disponibles.</p>
+            {needsRegion && (
+              <p className="text-sm text-muted-foreground">Selecciona tu <strong>región</strong> para ver los turnos disponibles.</p>
             )}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
@@ -150,7 +154,17 @@ function HomePage() {
               {showNegocioZona && (
                 <>
                   <div className="space-y-2">
-                    <Label>Negocio</Label>
+                    <Label>Región <span className="text-destructive">*</span></Label>
+                    <Select value={region} onValueChange={(v) => setRegion(v as Region)}>
+                      <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="managua">Managua (MGA)</SelectItem>
+                        <SelectItem value="foraneas">Foráneas (FOR)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Negocio principal <span className="text-muted-foreground text-xs">(opcional)</span></Label>
                     <Select value={negocio} onValueChange={(v) => setNegocio(v as Business)}>
                       <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
                       <SelectContent>
@@ -160,7 +174,7 @@ function HomePage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Zona</Label>
+                    <Label>Zona <span className="text-muted-foreground text-xs">(opcional)</span></Label>
                     <Select value={zonaId} onValueChange={setZonaId}>
                       <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
                       <SelectContent>
@@ -174,10 +188,10 @@ function HomePage() {
               )}
             </div>
             <div className="flex justify-end gap-2">
-              {editing && !needsNegocio && roles.length > 0 && (
+              {editing && !needsRegion && roles.length > 0 && (
                 <Button variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
               )}
-              <Button disabled={saving || saveProfile.isPending} onClick={() => { setSaving(true); saveProfile.mutate(undefined, { onSettled: () => setSaving(false) }); }}>
+              <Button disabled={saving || saveProfile.isPending || (isAgente && !region)} onClick={() => { setSaving(true); saveProfile.mutate(undefined, { onSettled: () => setSaving(false) }); }}>
                 Guardar
               </Button>
             </div>
@@ -190,7 +204,8 @@ function HomePage() {
               <div className="font-medium truncate">{profile?.nombre_completo ?? "Mi cuenta"}</div>
               <div className="flex gap-1.5 flex-wrap pt-1">
                 {roles.map((r) => <Badge key={r} variant="outline" className="text-[10px]">{r}</Badge>)}
-                {profile?.negocio && <Badge className="text-[10px]">{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
+                {profile?.region && <Badge className="text-[10px]">{regionLabel(profile.region)}</Badge>}
+                {profile?.negocio && <Badge variant="secondary" className="text-[10px]">{profile.negocio === "productos" ? "Productos" : "MBK"}</Badge>}
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={() => setEditing(true)}>Editar</Button>

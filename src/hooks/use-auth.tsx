@@ -6,12 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "admin" | "gt" | "gz" | "agente";
 export type Business = "productos" | "mbk";
+export type Region = "managua" | "foraneas";
 
 export interface ProfileRow {
   id: string;
   nombre_completo: string | null;
   telefono: string | null;
   negocio: Business | null;
+  region: Region | null;
   zona_id: string | null;
   tienda_id: string | null;
   activo: boolean;

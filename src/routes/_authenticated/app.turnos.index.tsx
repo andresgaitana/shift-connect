@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, MapPin, Clock } from "lucide-react";
-import { formatFecha, negocioLabel } from "@/lib/format";
+import { formatFecha } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/turnos/")({
   head: () => ({ meta: [{ title: "Turnos disponibles — CoverTurnos" }] }),
@@ -26,7 +26,7 @@ function TurnosListPage() {
   });
 
   const turnos = useQuery({
-    queryKey: ["turnos-abiertos", profile?.negocio],
+    queryKey: ["turnos-abiertos", profile?.region],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("turnos_vacantes")
@@ -42,11 +42,11 @@ function TurnosListPage() {
   if (!roles.includes("agente")) {
     return <p className="text-sm text-muted-foreground">Esta sección es solo para agentes.</p>;
   }
-  if (!profile?.negocio) {
+  if (!profile?.region) {
     return (
       <Card>
         <CardContent className="py-6 text-center text-sm text-muted-foreground">
-          Selecciona tu negocio en <Link to="/app" className="text-primary underline">Inicio</Link> para ver los turnos disponibles.
+          Selecciona tu región en <Link to="/app" className="text-primary underline">Inicio</Link> para ver los turnos disponibles.
         </CardContent>
       </Card>
     );
@@ -67,7 +67,7 @@ function TurnosListPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">Turnos disponibles</h1>
-        <p className="text-sm text-muted-foreground">{negocioLabel(profile.negocio)} · {filtered.length} disponibles</p>
+        <p className="text-sm text-muted-foreground">{regionLabel(profile.region)} · {filtered.length} disponibles</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">

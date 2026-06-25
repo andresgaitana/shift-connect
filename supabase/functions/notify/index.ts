@@ -39,15 +39,16 @@ async function sendMail(to: string[], subject: string, html: string) {
     },
   });
   try {
-    // Un solo envío con todos los destinatarios en BCC (privacidad entre agentes).
-    await client.send({
-      from: SMTP_FROM,
-      to: SMTP_FROM,
-      bcc: to,
-      subject,
-      content: "text/html",
-      html,
-    });
+    // Un envío por destinatario, en "Para:" directo (NO copia oculta): mejor
+    // entregabilidad — el patrón To:self + BCC suele caer/descartarse en Gmail.
+    for (const rcpt of to) {
+      try {
+        await client.send({ from: SMTP_FROM, to: rcpt, subject, content: "text/html", html });
+        console.log("notify: enviado a", rcpt);
+      } catch (e) {
+        console.error("notify: fallo SMTP a", rcpt, String((e as Error)?.message ?? e));
+      }
+    }
   } finally {
     await client.close();
   }
